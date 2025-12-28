@@ -11,24 +11,24 @@
 body{
   margin:0;
   min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
   background:linear-gradient(135deg,#e6d9ff,#f3eaff,#d9ccff);
   overflow:hidden;
 }
 
-/* กล่อง */
+/* กล่องกลาง */
 .card{
-  background:rgba(255,255,255,.75);
-  backdrop-filter:blur(10px);
-  border-radius:24px;
-  padding:30px 20px;
-  text-align:center;
+  position:relative;
+  z-index:10;
+  margin:6vh auto;
   width:90%;
   max-width:420px;
+  background:rgba(255,255,255,.75);
+  backdrop-filter:blur(10px);
+  border-radius:26px;
+  padding:28px 20px;
+  text-align:center;
   box-shadow:0 20px 40px rgba(150,100,200,.25);
-  animation:fadeUp 1.2s ease;
+  animation:fadeUp 1s ease;
 }
 
 .main-img{
@@ -40,9 +40,10 @@ body{
   box-shadow:0 10px 25px rgba(160,120,200,.35);
 }
 
-h1{color:#6a3fb3;margin:18px 0 6px}
+h1{color:#6a3fb3;margin:16px 0 6px}
 p{color:#7a6a9a;font-size:15px}
 
+/* ปุ่มเพลง */
 .btn{
   margin-top:18px;
   padding:12px 26px;
@@ -53,40 +54,47 @@ p{color:#7a6a9a;font-size:15px}
   font-size:15px;
   cursor:pointer;
   box-shadow:0 8px 20px rgba(150,100,200,.4);
-  transition:.3s;
 }
-.btn:hover{transform:scale(1.05)}
+
+/* พื้นที่ลอย */
+.floating{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
 
 /* รูปลอย */
 .float-img{
   position:absolute;
-  width:55px;
-  height:55px;
+  bottom:-80px;
+  width:52px;
+  height:52px;
   border-radius:50%;
   object-fit:cover;
-  opacity:.5;
-  animation:float 10s infinite ease-in-out;
+  opacity:.55;
+  animation:rise linear forwards;
 }
 
 /* หัวใจ */
 .heart{
   position:absolute;
+  bottom:-40px;
   font-size:20px;
-  color:#c084ff;
-  opacity:.6;
-  animation:heartFloat 8s infinite ease-in-out;
+  opacity:.7;
+  animation:rise linear forwards;
 }
 
-@keyframes float{
-  0%{transform:translateY(0)}
-  50%{transform:translateY(-25px)}
-  100%{transform:translateY(0)}
-}
-
-@keyframes heartFloat{
-  0%{transform:translateY(0) scale(1)}
-  50%{transform:translateY(-30px) scale(1.2)}
-  100%{transform:translateY(0) scale(1)}
+@keyframes rise{
+  from{
+    transform:translateY(0);
+    opacity:0;
+  }
+  10%{opacity:1}
+  to{
+    transform:translateY(-120vh);
+    opacity:0;
+  }
 }
 
 @keyframes fadeUp{
@@ -98,24 +106,14 @@ p{color:#7a6a9a;font-size:15px}
 
 <body>
 
-<!-- รูปลอย (ซ้ำได้ ใช้รูปแค่ 2 รูป) -->
-<img src="pic1.jpg" class="float-img" style="top:8%; left:6%;">
-<img src="pic2.jpg" class="float-img" style="top:20%; right:8%;">
-<img src="pic1.jpg" class="float-img" style="bottom:18%; left:10%;">
-<img src="pic2.jpg" class="float-img" style="bottom:10%; right:14%;">
-<img src="pic1.jpg" class="float-img" style="top:50%; left:2%;">
-
-<!-- หัวใจ -->
-<div class="heart" style="top:12%; left:45%;">💜</div>
-<div class="heart" style="top:30%; right:20%;">💜</div>
-<div class="heart" style="bottom:25%; left:30%;">💜</div>
-<div class="heart" style="bottom:15%; right:40%;">💜</div>
-<div class="heart" style="top:55%; right:5%;">💜</div>
+<div class="floating" id="floating"></div>
 
 <div class="card">
   <img src="main.jpg" class="main-img">
   <h1>Happy Anniversary 💜</h1>
   <p>ขอบคุณที่อยู่ด้วยกันเสมอ</p>
+
+  <!-- ปุ่มเพลง (กดแล้วเล่นได้แน่นอน) -->
   <button class="btn" onclick="toggleMusic()">🎧 เปิด / ปิด เพลง</button>
 </div>
 
@@ -124,13 +122,54 @@ p{color:#7a6a9a;font-size:15px}
 </audio>
 
 <script>
-const music=document.getElementById("music");
-let playing=false;
+const floating = document.getElementById("floating");
+const imgs = ["pic1.jpg","pic2.jpg"];
+const hearts = ["💜","💖","💗","💞","🤍","💙","🩷"];
+
+function spawn(){
+  const isImage = Math.random() > 0.4;
+
+  if(isImage){
+    const img = document.createElement("img");
+    img.src = imgs[Math.floor(Math.random()*imgs.length)];
+    img.className = "float-img";
+    img.style.left = Math.random()*100 + "vw";
+    img.style.animationDuration = (8 + Math.random()*6) + "s";
+    floating.appendChild(img);
+
+    setTimeout(()=>img.remove(),15000);
+  }else{
+    const h = document.createElement("div");
+    h.className = "heart";
+    h.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+    h.style.left = Math.random()*100 + "vw";
+    h.style.fontSize = (16 + Math.random()*14) + "px";
+    h.style.animationDuration = (6 + Math.random()*6) + "s";
+    floating.appendChild(h);
+
+    setTimeout(()=>h.remove(),15000);
+  }
+}
+
+/* ปล่อยของเรื่อยๆ */
+setInterval(spawn, 500);
+
+/* เพลง */
+const music = document.getElementById("music");
+let playing = false;
+
 function toggleMusic(){
-  playing?music.pause():music.play();
-  playing=!playing;
+  if(!playing){
+    music.play().catch(()=>{});
+    playing = true;
+  }else{
+    music.pause();
+    playing = false;
+  }
 }
 </script>
 
+</body>
+</html>
 </body>
 </html>
